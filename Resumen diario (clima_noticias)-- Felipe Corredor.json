@@ -1,0 +1,212 @@
+{
+  "name": "Resumen diario (clima/noticias)-- Felipe Corredor",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5df87977-4dfd-4e9b-8478-ac9ec13406fb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=7.1254&longitude=-73.1198&current=temperature_2m,relative_humidity_2m,weather_code",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5008c08f-cd20-4690-b16d-548d5980c420",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "11CI8x02RC39cNhHcBiH9hQy3OerWeexF2ZTJw0ah0jM",
+          "mode": "list",
+          "cachedResultName": "Resumen diario (clima/noticias)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11CI8x02RC39cNhHcBiH9hQy3OerWeexF2ZTJw0ah0jM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11CI8x02RC39cNhHcBiH9hQy3OerWeexF2ZTJw0ah0jM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Temperatura": "={{ $json.current.temperature_2m }}",
+            "Humedad": "={{ $json.current.relative_humidity_2m }}",
+            "Codigo_Clima": "={{ $json.current.weather_code }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Temperatura",
+              "displayName": "Temperatura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Humedad",
+              "displayName": "Humedad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Codigo_Clima",
+              "displayName": "Codigo_Clima",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        0
+      ],
+      "id": "9b52fa75-9bca-4429-9834-b749f489d345",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "y5wkaXegDhEuOGEN",
+          "name": "pipecredencial"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "felipechatgpt74@gmail.com",
+        "subject": "Resumen Diario del Clima",
+        "message": "=\"Hola, aquí tienes tu resumen del clima actual en Bucaramanga: Temperatura: {{ $json.Temperatura }}°C, Humedad: {{$json.Humedad }}%.\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "e56a3285-398d-436e-9e86-72551b03fe14",
+      "name": "Send a message",
+      "webhookId": "d610ac83-844f-4618-a8ed-4168039bb8d9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C4f5JO88EwFzXK09",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8801824603",
+        "text": "=Hola, aquí tienes el reporte del clima actual en Bucaramanga: Temperatura: {{ $('HTTP Request').item.json.current.temperature_2m }}°C, Humedad: {{ $('HTTP Request').item.json.current.relative_humidity_2m }}%.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "4930c83e-41f0-42d5-842f-777c9fba3a15",
+      "name": "Send a text message",
+      "webhookId": "81c5c440-d7ef-4338-8b65-b9cb7818fe27",
+      "credentials": {
+        "telegramApi": {
+          "id": "tSOTcSlHRcCOQXy5",
+          "name": "credencialdepipe"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1c58a690-d828-4f5d-8c59-e41e3300b592",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d573ee11e0f452f1f559b666d0d33c8d4fc65454eca3f1ac284c6a63882956d0"
+  },
+  "nodeGroups": [],
+  "id": "TTzCBhWptcDWkl1T",
+  "tags": []
+}
